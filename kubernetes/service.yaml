@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: django-microservice
+  labels:
+    app: django-microservice
+spec:
+  selector:
+    app: django-microservice
+  ports:
+  - port: 80
+    targetPort: 8000
+  type: ClusterIP

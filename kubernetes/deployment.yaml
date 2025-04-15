@@ -1,0 +1,180 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-microservice
+  labels:
+    app: django-microservice
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: django-microservice
+  template:
+    metadata:
+      labels:
+        app: django-microservice
+    spec:
+      containers:
+      - name: django
+        image: willywan/django-microservice:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: SECRET_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: SECRET_KEY
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DEBUG
+        - name: ALLOWED_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: ALLOWED_HOSTS
+        - name: DB_ENGINE
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DB_ENGINE
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DB_PASSWORD
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DB_PORT
+        - name: CELERY_BROKER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: CELERY_BROKER_URL
+        - name: CELERY_RESULT_BACKEND
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: CELERY_RESULT_BACKEND
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+        readinessProbe:
+          httpGet:
+            path: /admin/login/
+            port: 8000
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /admin/login/
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 15
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker
+  labels:
+    app: celery-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: celery-worker
+  template:
+    metadata:
+      labels:
+        app: celery-worker
+    spec:
+      containers:
+      - name: celery
+        image: willywan/django-microservice:latest
+        command: ["celery", "-A", "core", "worker", "--loglevel=info"]
+        env:
+        - name: SECRET_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: SECRET_KEY
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DEBUG
+        - name: ALLOWED_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: ALLOWED_HOSTS
+        - name: DB_ENGINE
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DB_ENGINE
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DB_PASSWORD
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DB_PORT
+        - name: CELERY_BROKER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: CELERY_BROKER_URL
+        - name: CELERY_RESULT_BACKEND
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: CELERY_RESULT_BACKEND
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "200m"
+            memory: "256Mi"

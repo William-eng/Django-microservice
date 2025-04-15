@@ -35,7 +35,7 @@ The application consists of the following components:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/django-microservice.git
+   git clone https://github.com/William-eng/Django-microservice.git
    cd django-microservice
    ```
 

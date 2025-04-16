@@ -12,7 +12,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy .env.example to .env
-COPY .env.example .env
+COPY .env-example /app/.env
 # Copy project
 COPY . .
 

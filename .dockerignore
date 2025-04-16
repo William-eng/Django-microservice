@@ -41,11 +41,6 @@ Dockerfile
 docker-compose.yml
 
 # Local environment
-.env*
-.venv
-venv/
-ENV/
-
 # Terraform
 terraform/
 .terraform/

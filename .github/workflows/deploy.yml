@@ -81,7 +81,7 @@ jobs:
                 echo 'WARNING: .env-example file not found'
               fi
 
-              sudo docker compose up -d
+              sudo docker compose up -d --build
             "
 
         # scp -i ~/.ssh/id_rsa kubernetes/* ec2-user@$EC2_IP:/home/ec2-user/k8s/

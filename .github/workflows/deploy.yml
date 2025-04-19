@@ -52,13 +52,29 @@ jobs:
       env:
         EC2_IP: ${{ secrets.EC2_PUBLIC_IP }}
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        GITHUB_PAT: ${{ secrets.GITHUB_PAT }} 
       run: |
         mkdir -p ~/.ssh
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H $EC2_IP >> ~/.ssh/known_hosts
-        scp -i ~/.ssh/id_rsa -r $(ls -A | grep -v .git) ubuntu@$EC2_IP:/home/ubuntu/
-        ssh -i ~/.ssh/id_rsa ubuntu@$EC2_IP "cp /home/ubuntu/Django-microservice/.env-example /home/ubuntu/Django-microservice/.env"
-        ssh -i ~/.ssh/id_rsa ubuntu@$EC2_IP "sudo docker compose up -d"
+
+        ssh -i ~/.ssh/id_rsa ubuntu@$EC2_IP "
+              if [ -d '/home/ubuntu/Django-microservice' ]; then
+                cd /home/ubuntu/Django-microservice
+                git pull https://x-access-token:${GITHUB_PAT}@github.com/William-eng/Django-microservice.git
+              else
+                git clone https://x-access-token:${GITHUB_PAT}@github.com/William-eng/Django-microservice.git /home/ubuntu/Django-microservice
+                cd /home/ubuntu/Django-microservice
+              fi
+
+              if [ -f '.env-example' ]; then
+                cp .env-example .env
+              else
+                echo 'WARNING: .env-example file not found'
+              fi
+
+              sudo docker compose up -d
+            "
         # scp -i ~/.ssh/id_rsa kubernetes/* ec2-user@$EC2_IP:/home/ubuntu/k8s/
         # ssh -i ~/.ssh/id_rsa ec2-user@$EC2_IP "kubectl apply -f /home/ubuntu/k8s/"

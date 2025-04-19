@@ -57,7 +57,7 @@ jobs:
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H $EC2_IP >> ~/.ssh/known_hosts
-        scp -i ~/.ssh/id_rsa -r . ec2-user@$EC2_IP:/home/ec2-user/
-        ssh -i ~/.ssh/id_rsa ec2-user@$EC2_IP "docker-compose up -d"
-        # scp -i ~/.ssh/id_rsa kubernetes/* ec2-user@$EC2_IP:/home/ec2-user/k8s/
-        # ssh -i ~/.ssh/id_rsa ec2-user@$EC2_IP "kubectl apply -f /home/ec2-user/k8s/"
+        scp -i ~/.ssh/id_rsa -r . ec2-user@$EC2_IP:/home/ubuntu/
+        ssh -i ~/.ssh/id_rsa ec2-user@$EC2_IP "sudo docker compose up -d"
+        # scp -i ~/.ssh/id_rsa kubernetes/* ec2-user@$EC2_IP:/home/ubuntu/k8s/
+        # ssh -i ~/.ssh/id_rsa ec2-user@$EC2_IP "kubectl apply -f /home/ubuntu/k8s/"

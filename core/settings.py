@@ -1,3 +1,4 @@
+print("LOADING SETTINGS FILE:", __file__)
 import os
 from pathlib import Path
 from dotenv import load_dotenv

@@ -1,57 +1,41 @@
-from rest_framework import status
-from rest_framework.views import APIView
+from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from .models import ProcessRequest
+from .serializers import ProcessRequestSerializer
+from .tasks import process_request_task
 from drf_yasg.utils import swagger_auto_schema
-from celery.result import AsyncResult
+from drf_yasg import openapi
 
-from .serializers import TaskRequestSerializer, TaskResponseSerializer, TaskResultSerializer
-from .tasks import process_message
-from .models import TaskResult
-
-class ProcessAPIView(APIView):
-    permission_classes = [AllowAny]  # For demo purposes
+class ProcessRequestView(generics.CreateAPIView):
+    serializer_class = ProcessRequestSerializer
 
     @swagger_auto_schema(
-        request_body=TaskRequestSerializer,
-        responses={202: TaskResponseSerializer}
+        operation_description="Create a new process request",
+        request_body=ProcessRequestSerializer,
+        responses={202: ProcessRequestSerializer()}
     )
-    def post(self, request):
-        serializer = TaskRequestSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data['email']
-            message = serializer.validated_data['message']
-            
-            # Start Celery task
-            task = process_message.delay(None, email, message)
-            
-            # Create task record
-            TaskResult.objects.create(
-                task_id=task.id,
-                email=email,
-                message=message,
-                status='PENDING'
-            )
-            
-            return Response({
-                'task_id': task.id,
-                'status': 'pending'
-            }, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+        
+        # Start Celery task
+        task = process_request_task.delay(instance.id)
+        
+        # Update task_id
+        instance.task_id = task.id
+        instance.save()
+        
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
-class TaskStatusAPIView(APIView):
-    permission_classes = [AllowAny]  # For demo purposes
+class TaskStatusView(generics.RetrieveAPIView):
+    queryset = ProcessRequest.objects.all()
+    serializer_class = ProcessRequestSerializer
+    lookup_field = 'task_id'
 
     @swagger_auto_schema(
-        responses={200: TaskResultSerializer}
+        operation_description="Get the status of a process request",
+        responses={200: ProcessRequestSerializer()}
     )
-    def get(self, request, task_id):
-        try:
-            task_result = TaskResult.objects.get(task_id=task_id)
-            serializer = TaskResultSerializer(task_result)
-            return Response(serializer.data)
-        except TaskResult.DoesNotExist:
-            return Response(
-                {'error': 'Task not found'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)

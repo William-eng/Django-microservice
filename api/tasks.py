@@ -1,40 +1,18 @@
 import time
-import logging
 from celery import shared_task
-from .models import TaskResult
-
-logger = logging.getLogger(__name__)
+from .models import ProcessRequest
 
 @shared_task
-def process_message(task_id, email, message):
+def process_request_task(request_id):
     try:
-        # Get or create task result
-        task_result, created = TaskResult.objects.get_or_create(
-            task_id=task_id,
-            defaults={'email': email, 'message': message, 'status': 'PROCESSING'}
-        )
+        # Simulate time-consuming task
+        time.sleep(10)
         
-        if not created:
-            task_result.status = 'PROCESSING'
-            task_result.save()
+        # Update request status
+        request = ProcessRequest.objects.get(id=request_id)
+        request.status = 'COMPLETED'
+        request.save()
         
-        # Simulate time-consuming operation
-        logger.info(f"Processing task {task_id} for {email}")
-        time.sleep(10)  # Simulate work
-        
-        # Update task status
-        task_result.status = 'COMPLETED'
-        task_result.save()
-        
-        logger.info(f"Task {task_id} completed successfully")
-        return {'status': 'completed', 'task_id': task_id}
-    
+        return {'status': 'success', 'request_id': request_id}
     except Exception as e:
-        logger.error(f"Error processing task {task_id}: {str(e)}")
-        
-        # Update task status to failed
-        task_result = TaskResult.objects.get(task_id=task_id)
-        task_result.status = 'FAILED'
-        task_result.save()
-        
-        return {'status': 'failed', 'task_id': task_id, 'error': str(e)}
+        return {'status': 'error', 'message': str(e)}

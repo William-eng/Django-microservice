@@ -1,15 +1,8 @@
 from rest_framework import serializers
-from .models import TaskResult
+from .models import ProcessRequest
 
-class TaskRequestSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    message = serializers.CharField()
-
-class TaskResponseSerializer(serializers.Serializer):
-    task_id = serializers.CharField()
-    status = serializers.CharField()
-
-class TaskResultSerializer(serializers.ModelSerializer):
+class ProcessRequestSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TaskResult
-        fields = ['task_id', 'email', 'message', 'status', 'created_at', 'updated_at']
+        model = ProcessRequest
+        fields = ['id', 'email', 'message', 'task_id', 'status', 'created_at']
+        read_only_fields = ['task_id', 'status', 'created_at']

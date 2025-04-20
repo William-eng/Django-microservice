@@ -37,7 +37,7 @@ variable "instance_name" {
 variable "ami_id" {
   description = "AMI ID for the EC2 instance"
   type        = string
-  default     = "ami-00a929b66ed6e0de6" # Change this to an Amazon Linux 2 on your aws dashboard
+  default     = "ami-084568db4383264d4" # Change this to an Ubuntu on your aws dashboard
 }
 
 variable "instance_type" {

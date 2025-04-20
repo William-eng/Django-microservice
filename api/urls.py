@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import ProcessAPIView, TaskStatusAPIView
+from .views import ProcessRequestView, TaskStatusView
 
 urlpatterns = [
-    path('process/', ProcessAPIView.as_view(), name='process'),
-    path('status/<str:task_id>/', TaskStatusAPIView.as_view(), name='task_status'),
+    path('process/', ProcessRequestView.as_view(), name='process-request'),
+    path('status/<str:task_id>/', TaskStatusView.as_view(), name='task-status'),
 ]

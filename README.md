@@ -39,27 +39,13 @@ The application consists of the following components:
    cd django-microservice
    ```
 
-2. Create a .env file from the example:
-   ```bash
-   cp .env.example .env
-   ```
-
-3. Start the application with Docker Compose:
+2. Start the application with Docker Compose:
    ```bash
    docker compose up -d
    ```
 
-4. Apply migrations:
-   ```bash
-   docker compose exec web python manage.py migrate
-   ```
 
-5. Create a superuser (optional):
-   ```bash
-   docker compose exec web python manage.py createsuperuser
-   ```
-
-6. Access the application at http://localhost:8000
+3. Access the application at http://localhost:8000
 
 ## Production Deployment
 
@@ -87,7 +73,7 @@ The application consists of the following components:
 
 3. Apply Terraform configuration:
    ```bash
-   terraform apply
+   terraform apply 
    ```
 
 4. Setup GitHub repository secrets for CI/CD:
@@ -107,12 +93,12 @@ Once deployed, you can test the API using curl:
 
 ```bash
 # Queue a new task
-curl -X POST http://your-load-balancer-url/api/process/ \
+curl -X POST http://<public-ip-of-instance>:8000/api/process/ \
   -H "Content-Type: application/json" \
   -d '{"email": "user@example.com", "message": "Hello World"}'
 
 # Check task status
-curl -X GET http://your-load-balancer-url/api/status/your-task-id/
+curl -X GET http://<public-ip-of-instance>:8000/api/status/your-task-id/
 ```
 
 ## Infrastructure Details
@@ -133,9 +119,7 @@ The GitHub Actions workflow performs:
 3. **Pushing**: Pushes the image to AWS ECR
 4. **Deploying**: Updates the Kubernetes deployment on k3s
 
-## License
 
-MIT
 
 ## Contributing
 
